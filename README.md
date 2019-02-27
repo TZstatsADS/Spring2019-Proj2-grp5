@@ -19,14 +19,15 @@ The **learning goals** for this project is:
 Term: Spring 2019
 ![screenshot](doc/image_nyc.jpg)
 + Team #Group 5
-+ **Projec title**: + Hu,Yiyao yh3076@columbia.edu
++ **Projec title**: Live a Green Life in NYC—Shiny App Development Version 2.0
+        + Hu,Yiyao yh3076@columbia.edu
 	+ Xia, Xin xx2295@columbia.edu 
 	+ Wang, Zixiao zw2513@columbia.edu
 	+ Link to app:https://sheenxia.shinyapps.io/Greenlife/
 	
 ![screenshot](doc/green2.0Screenshot.png)
 
-+ **Project summary**: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
++ **Project summary**: As a result of rapid industrialization, urbanization and motorization, daily air quality has become a big environmental issue. In response to the air pollution issue, having a green life is important and crucial. In this way, people should all be involved in the "green" activities, which help to reduce air pollution. Moreover, to live a green life, the living environment is also very important. One of the major developments of the app is adding a function on selecting people's favorite place to live where they can have their ideal air quality. Besides, our app provides all kinds of comparison graphs based on what you require, which would help you to make an easier decision on your living condition. Go ahead and live a green life in New York City!
 
 + **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
 + Xia, Xin: Update and complete the shiny structure, contribute to Map and Report menu,create map for Rentals,Citibike and Garden,find and clean the datasets, update the github page.
