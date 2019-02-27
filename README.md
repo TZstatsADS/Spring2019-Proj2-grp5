@@ -30,8 +30,8 @@ Term: Spring 2019
 
 + **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
 + Xia, Xin: Update and complete the shiny structure, contribute to Map and Report menu,create map for Rentals,Citibike and Garden,find and clean the datasets, update the github page.
-+ Hu, Yiyao: Update the shiny structure, contribute to Map and Report menu, create histogram plot ,Parcoords plot, radar plot and Chart plot, find and clean the datasets,update the github page.
-+ Wang, Zixiao:Update the shiny structure,contribute to Introduction, Map, Report, and Data menu, create histogram plot and radar plot,find and clean the datasets, update the github page, prepare for presentation.
++ Hu, Yiyao: Update the shiny structure, contribute to Map and Report menu, create Histogram plot ,Parcoords plot, Radar plot and Chart plot, find and clean the datasets,update the github page.
++ Wang, Zixiao:Update the shiny structure,contribute to Introduction, Map, Report,and Data menu, write articles,create Histogram plot and Radar plot,find and clean the datasets, update the github page, prepare for presentation.
 
 + **Data source**: 
 	+ The air quality dataset with map file can be found at [nyc.gov](http://a816-dohbesp.nyc.gov/IndicatorPublic/PublicTracking.aspx)
