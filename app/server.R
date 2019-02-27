@@ -1,168 +1,277 @@
+## server.R
+
 library(shiny)
-library(choroplethr)
-library(choroplethrZip)
-library(dplyr)
+library(shinydashboard)
+library(data.table)
+library(ggmap)
+library(plotly)
+library(fmsb)
+library(RJSONIO)
+library(geosphere)
+library(purrr)
+library(tidyverse)
 library(leaflet)
-library(maps)
-library(rgdal)
+library(geojsonio)
+library(tigris)
+library(parcoords)
+library(GGally)
+library(htmltools)
 
-## Define Manhattan's neighborhood
-man.nbhd=c("all neighborhoods", "Central Harlem", 
-           "Chelsea and Clinton",
-           "East Harlem", 
-           "Gramercy Park and Murray Hill",
-           "Greenwich Village and Soho", 
-           "Lower Manhattan",
-           "Lower East Side", 
-           "Upper East Side", 
-           "Upper West Side",
-           "Inwood and Washington Heights")
-zip.nbhd=as.list(1:length(man.nbhd))
-zip.nbhd[[1]]=as.character(c(10026, 10027, 10030, 10037, 10039))
-zip.nbhd[[2]]=as.character(c(10001, 10011, 10018, 10019, 10020))
-zip.nbhd[[3]]=as.character(c(10036, 10029, 10035))
-zip.nbhd[[4]]=as.character(c(10010, 10016, 10017, 10022))
-zip.nbhd[[5]]=as.character(c(10012, 10013, 10014))
-zip.nbhd[[6]]=as.character(c(10004, 10005, 10006, 10007, 10038, 10280))
-zip.nbhd[[7]]=as.character(c(10002, 10003, 10009))
-zip.nbhd[[8]]=as.character(c(10021, 10028, 10044, 10065, 10075, 10128))
-zip.nbhd[[9]]=as.character(c(10023, 10024, 10025))
-zip.nbhd[[10]]=as.character(c(10031, 10032, 10033, 10034, 10040))
 
-## Load housing data
-load("../output/count.RData")
-load("../output/mh2009use.RData")
+# source auxiliary functions
+source( "./helpers.R" )
 
-# Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+shinyServer(
   
-  ## Neighborhood name
-  output$text = renderText({"Selected:"})
-  output$text1 = renderText({
-      paste("{ ", man.nbhd[as.numeric(input$nbhd)+1], " }")
-  })
+  function(input, output) 
+  {
+    
+    ################################################################
+    ## Reading input data
+    ################################################################
+    
+    ## read all input data
+    inputData <- readData()
+    
+    ## get community gardens data
+    gardens <- inputData$gardens
+    gardens<- gardens%>%select(Garden.Name,Latitude,Longitude)%>%na.omit()
+    
+    
+    ## get map data
+    nycd <- inputData$nycd
+    
+    ## get bike data
+    bike <- inputData$bike
+    
+    ## get house data
+    house <- inputData$house
+    ## get air quality data
+    air <- inputData$air
+    
+    # air      <- as.data.table( read.csv( "Air_Quality_new.csv" ) )
+    air <- air%>%select(-c(message,X))%>%filter(geo_type_name == "CD")%>%na.omit()  
+ 
+    # get report2 for parcoordinates
+    data.report2<- inputData$data.report2
+    names(data.report2)[9]="Boroughs"
+    data.report2<-data.report2 %>%select(-X)
+    Boroughs.order <- data.report2 %>% group_by(Boroughs)%>%summarize(n = n())%>%arrange(n)
+    data.report2$Boroughs <- factor(data.report2$Boroughs,levels = Boroughs.order$Boroughs)
+    
+    
+    # data for charts 
+    geo5<-inputData$geo5
+    colnames(geo5)[1]="Pollution"
+    report5geo<-data.frame("geo_entity_name"=geo5[1:5,2],"PM2.5"=geo5[1:5,3],
+                           "Black_Carbon"=geo5[6:10,3],"O3"=geo5[11:15,3],"NO2"=geo5[16:20,3],"NO"=geo5[21:25,3])
+
+     
+    maxmin <- data.frame(
+      PM2.5=c(10,6),
+      Black_Carbon=c(1.5, 0.5),
+      O3=c(37, 27),
+      NO2=c(30, 10),
+      NO=c(30,5)
+    )
+    dat<-rbind(maxmin,report5geo[,-1])  
+    
   
-  ## Panel 1: summary plots of time trends, 
-  ##          unit price and full price of sales. 
-  
-  output$distPlot <- renderPlot({
     
-    ## First filter data for selected neighborhood
-    mh2009.sel=mh2009.use
-    if(input$nbhd>0){
-      mh2009.sel=mh2009.use%>%
-                  filter(region %in% zip.nbhd[[as.numeric(input$nbhd)]])
-    }
     
-    ## Monthly counts
-    month.v=as.vector(table(mh2009.sel$sale.month))
-    
-    ## Price: unit (per sq. ft.) and full
-    type.price=data.frame(bldg.type=c("10", "13", "25", "28"))
-    type.price.sel=mh2009.sel%>%
-                group_by(bldg.type)%>%
-                summarise(
-                  price.mean=mean(sale.price, na.rm=T),
-                  price.median=median(sale.price, na.rm=T),
-                  unit.mean=mean(unit.price, na.rm=T),
-                  unit.median=median(unit.price, na.rm=T),
-                  sale.n=n()
-                )
-    type.price=left_join(type.price, type.price.sel, by="bldg.type")
-    
-    ## Making the plots
-    layout(matrix(c(1,1,1,1,2,2,3,3,2,2,3,3), 3, 4, byrow=T))
-    par(cex.axis=1.3, cex.lab=1.5, 
-        font.axis=2, font.lab=2, col.axis="dark gray", bty="n")
-    
-    ### Sales monthly counts
-    plot(1:12, month.v, xlab="Months", ylab="Total sales", 
-         type="b", pch=21, col="black", bg="red", 
-         cex=2, lwd=2, ylim=c(0, max(month.v,na.rm=T)*1.05))
-    
-    ### Price per square foot
-    plot(c(0, max(type.price[,c(4,5)], na.rm=T)), 
-         c(0,5), 
-         xlab="Price per square foot", ylab="", 
-         bty="l", type="n")
-    text(rep(0, 4), 1:4+0.5, paste(c("coops", "condos", "luxury hotels", "comm. condos"), 
-                                  type.price$sale.n, sep=": "), adj=0, cex=1.5)
-    points(type.price$unit.mean, 1:nrow(type.price), pch=16, col=2, cex=2)
-    points(type.price$unit.median, 1:nrow(type.price),  pch=16, col=4, cex=2)
-    segments(type.price$unit.mean, 1:nrow(type.price), 
-              type.price$unit.median, 1:nrow(type.price),
-             lwd=2)    
-    
-    ### full price
-    plot(c(0, max(type.price[,-1], na.rm=T)), 
-         c(0,5), 
-         xlab="Sales Price", ylab="", 
-         bty="l", type="n")
-    text(rep(0, 4), 1:4+0.5, paste(c("coops", "condos", "luxury hotels", "comm. condos"), 
-                                   type.price$sale.n, sep=": "), adj=0, cex=1.5)
-    points(type.price$price.mean, 1:nrow(type.price), pch=16, col=2, cex=2)
-    points(type.price$price.median, 1:nrow(type.price),  pch=16, col=4, cex=2)
-    segments(type.price$price.mean, 1:nrow(type.price), 
-             type.price$price.median, 1:nrow(type.price),
-             lwd=2)    
-  })
-  
-  ## Panel 2: map of sales distribution
-  output$distPlot1 <- renderPlot({
-    count.df.sel=count.df
-    if(input$nbhd>0){
-      count.df.sel=count.df%>%
-        filter(region %in% zip.nbhd[[as.numeric(input$nbhd)]])
-    }
-    # make the map for selected neighhoods
-    
-    zip_choropleth(count.df.sel,
-                   title       = "2009 Manhattan housing sales",
-                   legend      = "Number of sales",
-                   county_zoom = 36061)
-  })
-  
-  ## Panel 3: leaflet
-  output$map <- renderLeaflet({
-    count.df.sel=count.df
-    if(input$nbhd>0){
-      count.df.sel=count.df%>%
-        filter(region %in% zip.nbhd[[as.numeric(input$nbhd)]])
-    }
-    
-    # From https://data.cityofnewyork.us/Business/Zip-Code-Boundaries/i8iw-xf4u/data
-    NYCzipcodes <- readOGR("../data/ZIP_CODE_040114.shp",
-                           #layer = "ZIP_CODE", 
-                           verbose = FALSE)
-    
-    selZip <- subset(NYCzipcodes, NYCzipcodes$ZIPCODE %in% count.df.sel$region)
-    
-    # ----- Transform to EPSG 4326 - WGS84 (required)
-    subdat<-spTransform(selZip, CRS("+init=epsg:4326"))
-    
-    # ----- save the data slot
-    subdat_data=subdat@data[,c("ZIPCODE", "POPULATION")]
-    subdat.rownames=rownames(subdat_data)
-    subdat_data=
-      subdat_data%>%left_join(count.df, by=c("ZIPCODE" = "region"))
-    rownames(subdat_data)=subdat.rownames
-    
-    # ----- to write to geojson we need a SpatialPolygonsDataFrame
-    subdat<-SpatialPolygonsDataFrame(subdat, data=subdat_data)
-    
-    # ----- set uo color pallette https://rstudio.github.io/leaflet/colors.html
-    # Create a continuous palette function
-    pal <- colorNumeric(
-      palette = "Blues",
-      domain = subdat$POPULATION
+    ## create icon to display in map
+    treeIcons <- icons(
+      iconUrl = "./www/leaf.png",
+      iconWidth = 45, iconHeight = 30,
+      iconAnchorX =18, iconAnchorY = 18
     )
     
-    leaflet(subdat) %>%
-      addTiles()%>%
-      addPolygons(
-        stroke = T, weight=1,
-        fillOpacity = 0.6,
-        color = ~pal(POPULATION)
-      )
+    bikeIcons <- icons(
+      iconUrl = "./www/citiBike.png",
+      iconWidth = 45, iconHeight = 30,
+      iconAnchorX = 18, iconAnchorY = 18
+    )
+    
+    houseIcons <- icons(
+      iconUrl = ifelse(house$X2016 < 1800, "./www/low_rent.png",
+                ifelse(house$X2016>= 1800 & house$X2016 <=2000,"./www/medium_rent.png",
+                       "./www/high_rent.png")),
+      iconWidth = 50, iconHeight = 35,
+      iconAnchorX = 18, iconAnchorY =18)
+    
+    
+    
+   ## new air quality data for radar plot
+    newair<-data.frame(matrix(rep(1,295),59,5))
+    newair[,1] <- air[air$name=="Black Carbon",]$data_value
+    newair[,2] <- air$data_value[air$name=="Fine Particulate Matter (PM2.5)"]
+    newair[,3] <- air$data_value[air$name=="Nitric Oxide (NO)"]
+    newair[,4] <- air$data_value[air$name=="Nitrogen Dioxide (NO2)"]
+    newair[,5] <- air$data_value[air$name=="Ozone (O3)"]
+    colnames(newair) <- c("Black Carbon","Fine Particulate Matter (PM2.5)",
+                          "Nitric Oxide (NO)","Nitrogen Dioxide (NO2)","Ozone (O3)")
+    rownames(newair) <- air[air$name=="Ozone (O3)",]$geo_entity_name
+    
+
+    
+
+    ################################################################
+    ## Exploratory Data Analysis Plot
+    ################################################################
+   
+    
+    ################################################################
+    ## Maps
+    ################################################################
+    
+
+
+    ## render air map
+    
+    output$airmap <-renderLeaflet({
+      
+      show_map(air_data = air, 
+               map_data = nycd,
+               house_data = house, 
+               bike_data = bike,
+               garden_data = gardens,
+               air_choice = input$select_pollutant_type,
+               CD_choice = input$select_CD,
+               icon_choice = input$show_icon,
+               treeIcons,
+               bikeIcons,
+               houseIcons)
+    })
+
+    
+    
+    
+    
+    
+    ################################################################
+    ## UI rendered
+    ################################################################
+
+ 
+    
+    
+    output$uiEda1 <- renderUI({
+      
+      selectInput( 'eda1Pollut', 'Choose pollutant', 
+                   choices = c("ALL","Black Carbon","Fine Particulate Matter (PM2.5)",
+                                         "Nitric Oxide (NO)","Nitrogen Dioxide (NO2)","Ozone (O3)"), selected = "ALL")
+      
+    })
+    
+    
+    
+    output$uiEda2 <- renderUI({
+      
+      selectInput( 'eda2Community', 'Choose Community', 
+                   choices = c("ALL", unique(as.character(air$geo_entity_name))), selected = "Midtown (CD5)")
+      
+    })
+    
+    output$uiEda3 <- renderUI({
+      
+      selectInput( 'eda3Community', 'Choose Community', 
+                   choices = c("ALL", unique(as.character(air$geo_entity_name))), selected = "Midtown (CD5)")
+      
+    })
+    
+    
+    ###render histgram
+    #output$plot1EDA <- renderPlotly({
+      
+     # hist_and_density( data = air, type = input$eda1Pollut, BIN = input$bins)
+      
+    #})
+    output$plot1EDA <- renderPlot({
+      
+      
+      if(input$eda1Pollut=="ALL"){
+        x <- air$data_value
+        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+        hist(x, breaks = bins, col = "steelblue3", border = 'white', probability = T,
+             main = "Density for All Air Quality Index", xlab = "Index (Value)")
+        lines(density(x, adjust=2), col="blue", lwd=2, lty = 3)
+        lines(density(x), col="green", lwd=2) 
+        legend("topright", title = "Density", legend = c("smoothed", "regular"), 
+               lty = c(3, 1), col = c("blue", "green"), cex = 0.75)
+        
+      }
+      else {
+        x <- air[air$name==input$eda1Pollut,]$data_value
+        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+        hist(x, breaks = bins, col = "steelblue3", border = 'white', probability = T,
+             main = paste("Density for", input$eda1Pollut), xlab = "Index (Value)")
+        lines(density(x, adjust=2), col="blue", lwd=2, lty = 3) 
+        lines(density(x), col="green", lwd=2) 
+        legend("topright", title = "Density", legend = c("smoothed", "regular"), 
+               lty = c(3, 1), col = c("blue", "green"), cex = 0.75)
+      }
+      
+    })
+    ##
+    
+    output$analysis <- renderText({
+    pollutantText( input$eda1Pollut )
+    
   })
-})
+    
+    
+    
+    ###render radar plot
+    output$radarplot <- renderPlot({
+      radar( data = newair, community = input$eda2Community, community1 = input$eda3Community)
+      
+    })
+    
+    ## render parcoordinates
+    output$parcoords = renderParcoords(
+      data.frame(data.report2)%>% arrange(Boroughs) %>% 
+        parcoords(
+          rownames = F 
+          , brushMode = "1D-axes"
+          , reorderable = T
+          , queue = T
+          , color = list(
+            colorBy = "Boroughs"
+            ,colorScale = htmlwidgets::JS("d3.scale.category10()") 
+        )
+    ))
+    
+    ## radar5b
+      output$radar5b = renderPlot(
+      radarchart(dat, axistype=2, plty=1, 
+                 pangle=c(10, 45, 120), axislabcol="darkgrey")
+        )
+    
+      
+      output$bar5b = renderPlot(
+        ggplot(data = geo5)+ 
+          geom_col(mapping = aes(x = geo_entity_name, y = data_value, fill = Pollution), alpha = 5/7)+
+          scale_fill_manual(values = alpha(c(4,5,6,7,11,2,1)))+xlab("Five Boroughs")+
+          ylab("Pollution Value")
+    
+      )
+    
+    ################################################################
+    ## Datasets
+    ################################################################
+    
+    ## render community gardens datatable
+    output$tableGarden <- renderDataTable( gardens )
+    
+    ## render air quality datatable
+    output$tableAir    <- renderDataTable( 
+      air[, input$show_vars]
+    )
+    
+    ## render bike station datatable
+    output$tableBike <- renderDataTable( bike )
+    
+  }
+  
+)
+
