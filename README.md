@@ -18,7 +18,7 @@ The **learning goals** for this project is:
 ## Project Title Green Life in NYC Version 2.0
 Term: Spring 2019
 ![screenshot](doc/image_nyc.jpg)
-+ Team #
++ Team #Group 5
 + **Projec title**: + Hu,Yiyao yh3076@columbia.edu
 	+ Xia, Xin xx2295@columbia.edu 
 	+ Wang, Zixiao zw2513@columbia.edu
