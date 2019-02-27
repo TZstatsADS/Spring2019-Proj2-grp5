@@ -2,8 +2,6 @@
 
 ### [Project Description](doc/project2_desc.md)
 
-![screenshot](doc/image_nyc.jpg)
-
 In this second project of GR5243 Applied Data Science, we develop a version 2.0 of an *Exploratory Data Analysis and Visualization* shiny app on a topic of your choice using [NYC Open Data](https://opendata.cityofnewyork.us/) or U.S. government open data released on the [data.gov](https://data.gov/) website. See [Project 2 Description](doc/project2_desc.md) for more details.  
 
 The **learning goals** for this project is:
@@ -19,12 +17,11 @@ The **learning goals** for this project is:
 
 ## Project Title Green Life in NYC Version 2.0
 Term: Spring 2019
-
+![screenshot](doc/image_nyc.jpg)
 + Team #
 + **Projec title**: + Hu,Yiyao yh3076@columbia.edu
 	+ Xia, Xin xx2295@columbia.edu 
 	+ Wang, Zixiao zw2513@columbia.edu
-	+ team member 5
 	+ Link to app:https://sheenxia.shinyapps.io/Greenlife/
 	
 ![screenshot](doc/green2.0Screenshot.png)
