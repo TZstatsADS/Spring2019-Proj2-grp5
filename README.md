@@ -20,8 +20,8 @@ Term: Spring 2019
 ![screenshot](doc/image_nyc.jpg)
 + Team #Group 5
 + **Projec title**: Live a Green Life in NYC—Shiny App Development Version 2.0
-        + Hu,Yiyao yh3076@columbia.edu
-	+ Xia, Xin xx2295@columbia.edu 
+	+ Hu,Yiyao yh3076@columbia.edu
+	+ Xia, Xin xx2295@columbia.edu
 	+ Wang, Zixiao zw2513@columbia.edu
 	+ Link to app:https://sheenxia.shinyapps.io/Greenlife/
 	
