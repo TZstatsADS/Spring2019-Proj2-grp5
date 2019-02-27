@@ -271,6 +271,8 @@ shinyServer(
     ## render bike station datatable
     output$tableBike <- renderDataTable( bike )
     
+    ## rentals datatable
+    output$tablerental<- renderDataTable(house)
   }
   
 )

@@ -5,8 +5,8 @@ account: sheenxia
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 742415
-bundleId: 1902543
+bundleId: 1904543
 url: https://sheenxia.shinyapps.io/Greenlife/
-when: 1551240263.59686
+when: 1551299974.66958
 asMultiple: FALSE
 asStatic: FALSE

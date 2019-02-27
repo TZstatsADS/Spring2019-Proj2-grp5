@@ -65,7 +65,10 @@ dashboardPage(
                menuSubItem('Community Gardens',
                            tabName = 'tGardenData' ),
                menuSubItem('Citibike station',
-                           tabName = 'tBikeData' )),
+                           tabName = 'tBikeData' ),
+               menuSubItem('Housing rents',
+                           tabName = 'rental' )
+               ),
       
       
       ################################################################
@@ -292,6 +295,14 @@ dashboardPage(
                  )
                )
       ),
+      
+      ## rentals data
+      tabItem(tabName = "rental",
+              fluidRow(
+                column(12,
+                      dataTableOutput('tablerental'))
+              )),
+      
       
       
       
