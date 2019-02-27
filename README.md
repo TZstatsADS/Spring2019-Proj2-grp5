@@ -35,7 +35,7 @@ Term: Spring 2019
 + Wang, Zixiao: Update the shiny structure,contribute to Introduction, Map, Report,and Data menu, write articles,create Histogram plot and Radar plot,find and clean the datasets, update the github page, prepare for presentation.
 
 + **Data source**: 
-	+ The air quality dataset with map file can be found at [nyc.gov](http://a816-dohbesp.nyc.gov/IndicatorPublic/PublicTracking.aspx)
+	+ The Air quality dataset with map file can be found at [nyc.gov](http://a816-dohbesp.nyc.gov/IndicatorPublic/PublicTracking.aspx)
 	+ The NYC Greenthumb Communicty Gardens can be found at [cityofnewyork.us](https://data.cityofnewyork.us/Environment/NYC-Greenthumb-Community-Gardens/ajxm-kzmj)
 	+ The Citi Bike dataset can be found at [citibikenyc.com](https://www.citibikenyc.com/system-data)
 	+ The Rentals dataset can be found at [coredata.nyc](http://app.coredata.nyc/?mlb=false&ntii=rent_asking_med&ntr=Community%20District&mz=14&vtl=https%3A%2F%2Fthefurmancenter.carto.com%2Fu%2Fnyufc%2Fapi%2Fv2%2Fviz%2F691a2b7c-94d7-46ac-ac4d-9a589cb2c6ed%2Fviz.json&mln=true&mlp=true&mlat=40.718&ptsb=&nty=2017&mb=roadmap&pf=%7B%22subsidies%22%3Atrue%7D&md=table&mlv=false&mlng=-73.996&btl=Borough&atp=neighborhoods#)
